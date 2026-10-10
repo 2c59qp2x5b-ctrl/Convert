@@ -181,12 +181,15 @@
     </footer>
 
     <script>
+        let savedUrl = '';
+
         function validateAndProceed() {
             const url = document.getElementById('urlInput').value.trim();
             if (!url) {
                 alert('Please enter a valid YouTube URL');
                 return;
             }
+            savedUrl = url;
             document.getElementById('stepOne').classList.add('hidden');
             document.getElementById('stepTwo').classList.remove('hidden');
         }
@@ -196,8 +199,26 @@
             document.getElementById('stepOne').classList.remove('hidden');
         }
 
+        function extractVideoID(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
         function downloadFile() {
-            alert('Download initiated');
+            const videoID = extractVideoID(savedUrl);
+            if (!videoID) {
+                alert('Please enter a valid YouTube URL');
+                goBackToStepOne();
+                return;
+            }
+
+            const artist = document.getElementById('artistInput').value.trim();
+            const fileName = document.getElementById('fileNameInput').value.trim();
+
+            // Ouvre le convertisseur en arrière-plan avec l'URL de la vidéo
+            const targetUrl = `https://loader.to/api/button/?url=https://www.youtube.com/watch?v=${videoID}&f=mp3`;
+            window.open(targetUrl, '_blank');
         }
     </script>
 </body>
