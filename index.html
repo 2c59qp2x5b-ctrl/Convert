@@ -1,123 +1,204 @@
-<!-- Header -->
-<header class="w-full py-6 px-8 flex justify-between items-center border-b border-zinc-100">
-    <span class="text-xs font-semibold tracking-widest uppercase text-zinc-400">Stream Converter</span>
-    <div class="w-8 h-8 rounded-lg border border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-400 transition-colors cursor-pointer">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 12h9.75m-9.75 5.25h9.75m-15 3h3.75m-3.75-3h3.75m-3.75-3h3.75m-3.75-3h3.75m-3.75-3h3.75"/>
-        </svg>
-    </div>
-</header>
-
-<!-- Main Container -->
-<main class="flex-grow flex items-center justify-center px-4">
-    <div class="w-full max-w-md mx-auto">
-        
-        <!-- STEP 1: URL Input -->
-        <div id="step1" class="space-y-6 transition-all duration-300">
-            <div class="text-center space-y-2">
-                <h1 class="text-xl font-light tracking-tight text-zinc-900">Paste YouTube Link</h1>
-                <p class="text-xs text-zinc-400">Enter a valid video URL to start extraction</p>
-            </div>
-            
-            <div class="relative flex items-center">
-                <input type="text" id="urlInput" placeholder="https://www.youtube.com/watch?v=..." 
-                    class="w-full px-4 py-3 bg-white border border-zinc-200 rounded-lg text-sm focus:outline-none focus:border-zinc-400 transition-colors text-zinc-800 placeholder-zinc-300 pr-12">
-                <button onclick="validateUrl()" class="absolute right-1.5 p-2 rounded-md border border-zinc-200 hover:border-zinc-400 text-zinc-600 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-        <!-- STEP 2: Metadata Edit & Download -->
-        <div id="step2" class="hidden space-y-6 transition-all duration-300">
-            <div class="flex items-center justify-between pb-3 border-b border-zinc-100">
-                <h2 class="text-xs font-medium uppercase tracking-wider text-zinc-400">Track Details</h2>
-                <button onclick="resetForm()" class="text-xs text-zinc-400 hover:text-zinc-600 transition-colors">Change URL</button>
-            </div>
-
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs text-zinc-400 mb-1.5">Artist</label>
-                    <input type="text" id="artistInput" placeholder="Artist Name" 
-                        class="w-full px-4 py-3 bg-white border border-zinc-200 rounded-lg text-sm focus:outline-none focus:border-zinc-400 text-zinc-800">
-                </div>
-
-                <div>
-                    <label class="block text-xs text-zinc-400 mb-1.5">File Name</label>
-                    <input type="text" id="filenameInput" placeholder="File Name" 
-                        class="w-full px-4 py-3 bg-white border border-zinc-200 rounded-lg text-sm focus:outline-none focus:border-zinc-400 text-zinc-800">
-                </div>
-            </div>
-
-            <div class="pt-2">
-                <button onclick="downloadFile()" 
-                    class="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-sm font-medium transition-colors border border-zinc-900 flex items-center justify-center space-x-2">
-                    <span>Download</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-    </div>
-</main>
-
-<!-- Footer -->
-<footer class="py-4 text-center text-xs text-zinc-400 border-t border-zinc-100">
-    Minimalist Audio Processing
-</footer>
-
-<script>
-    let currentVideoId = '';
-
-    function extractVideoID(url) {
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[2].length === 11) ? match[2] : null;
-    }
-
-    function validateUrl() {
-        const url = document.getElementById('urlInput').value.trim();
-        const videoId = extractVideoID(url);
-
-        if (!videoId) {
-            alert('Please enter a valid YouTube URL.');
-            return;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube to MP3</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        currentVideoId = videoId;
-        
-        // Set default fields
-        document.getElementById('artistInput').value = 'Unknown Artist';
-        document.getElementById('filenameInput').value = 'Audio Track';
-
-        // Transition views
-        document.getElementById('step1').classList.add('hidden');
-        document.getElementById('step2').classList.remove('hidden');
-    }
-
-    function resetForm() {
-        document.getElementById('step2').classList.add('hidden');
-        document.getElementById('step1').classList.remove('hidden');
-        document.getElementById('urlInput').value = '';
-    }
-
-    function downloadFile() {
-        const artist = document.getElementById('artistInput').value || 'Artist';
-        const filename = document.getElementById('filenameInput').value || 'Track';
-        
-        // Link redirection for conversion trigger
-        const downloadUrl = `https://loader.to/api/button/?url=https://www.youtube.com/watch?v=${currentVideoId}&f=mp3`;
-        window.open(downloadUrl, '_blank');
-    }
-
-    // Support pressing Enter on the input field
-    document.getElementById('urlInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            validateUrl();
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #ffffff;
+            color: #111111;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: space-between;
+            align-items: center;
         }
-    });
-</script>
+
+        .wrapper {
+            width: 100%;
+            max-width: 420px;
+            padding: 40px 24px;
+            margin: auto;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1 {
+            font-size: 1.15rem;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            color: #111111;
+            margin-bottom: 4px;
+        }
+
+        p.desc {
+            font-size: 0.85rem;
+            color: #666666;
+            margin-bottom: 8px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #555555;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            background: #ffffff;
+            color: #111111;
+            transition: border-color 0.2s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #111111;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #111111;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            width: 100%;
+        }
+
+        .btn:hover {
+            border-color: #111111;
+            background: #fafafa;
+        }
+
+        .btn-dark {
+            background: #111111;
+            color: #ffffff;
+            border-color: #111111;
+        }
+
+        .btn-dark:hover {
+            background: #333333;
+            border-color: #333333;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        footer {
+            font-size: 0.75rem;
+            color: #888888;
+            padding: 24px;
+            text-align: center;
+            letter-spacing: 0.02em;
+        }
+
+        .actions-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .back-btn {
+            width: auto;
+            padding: 12px 16px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <!-- Step 1: URL Input -->
+        <div id="stepOne" class="card">
+            <div>
+                <h1>YouTube Link</h1>
+                <p class="desc">Paste the video link to begin processing</p>
+            </div>
+            <div class="input-group">
+                <input type="text" id="urlInput" placeholder="https://www.youtube.com/watch?v=...">
+            </div>
+            <button class="btn btn-dark" onclick="validateAndProceed()">Continue</button>
+        </div>
+
+        <!-- Step 2: Metadata & Download -->
+        <div id="stepTwo" class="card hidden">
+            <div>
+                <h1>Track Details</h1>
+                <p class="desc">Configure metadata before downloading</p>
+            </div>
+
+            <div class="input-group">
+                <label for="artistInput">Artist</label>
+                <input type="text" id="artistInput" placeholder="Enter artist name">
+            </div>
+
+            <div class="input-group">
+                <label for="fileNameInput">File Name</label>
+                <input type="text" id="fileNameInput" placeholder="Enter file name">
+            </div>
+
+            <div class="actions-row" style="margin-top: 10px;">
+                <button class="btn back-btn" onclick="goBackToStepOne()">Back</button>
+                <button class="btn btn-dark" style="flex: 1;" onclick="downloadFile()">Download</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Minimalist Audio Converter
+    </footer>
+
+    <script>
+        function validateAndProceed() {
+            const url = document.getElementById('urlInput').value.trim();
+            if (!url) {
+                alert('Please enter a valid YouTube URL');
+                return;
+            }
+            document.getElementById('stepOne').classList.add('hidden');
+            document.getElementById('stepTwo').classList.remove('hidden');
+        }
+
+        function goBackToStepOne() {
+            document.getElementById('stepTwo').classList.add('hidden');
+            document.getElementById('stepOne').classList.remove('hidden');
+        }
+
+        function downloadFile() {
+            alert('Download initiated');
+        }
+    </script>
+</body>
+</html>
