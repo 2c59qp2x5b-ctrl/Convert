@@ -1,1 +1,123 @@
+<!-- Header -->
+<header class="w-full py-6 px-8 flex justify-between items-center border-b border-zinc-100">
+    <span class="text-xs font-semibold tracking-widest uppercase text-zinc-400">Stream Converter</span>
+    <div class="w-8 h-8 rounded-lg border border-zinc-200 flex items-center justify-center text-zinc-600 hover:border-zinc-400 transition-colors cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 12h9.75m-9.75 5.25h9.75m-15 3h3.75m-3.75-3h3.75m-3.75-3h3.75m-3.75-3h3.75m-3.75-3h3.75"/>
+        </svg>
+    </div>
+</header>
 
+<!-- Main Container -->
+<main class="flex-grow flex items-center justify-center px-4">
+    <div class="w-full max-w-md mx-auto">
+        
+        <!-- STEP 1: URL Input -->
+        <div id="step1" class="space-y-6 transition-all duration-300">
+            <div class="text-center space-y-2">
+                <h1 class="text-xl font-light tracking-tight text-zinc-900">Paste YouTube Link</h1>
+                <p class="text-xs text-zinc-400">Enter a valid video URL to start extraction</p>
+            </div>
+            
+            <div class="relative flex items-center">
+                <input type="text" id="urlInput" placeholder="https://www.youtube.com/watch?v=..." 
+                    class="w-full px-4 py-3 bg-white border border-zinc-200 rounded-lg text-sm focus:outline-none focus:border-zinc-400 transition-colors text-zinc-800 placeholder-zinc-300 pr-12">
+                <button onclick="validateUrl()" class="absolute right-1.5 p-2 rounded-md border border-zinc-200 hover:border-zinc-400 text-zinc-600 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 2: Metadata Edit & Download -->
+        <div id="step2" class="hidden space-y-6 transition-all duration-300">
+            <div class="flex items-center justify-between pb-3 border-b border-zinc-100">
+                <h2 class="text-xs font-medium uppercase tracking-wider text-zinc-400">Track Details</h2>
+                <button onclick="resetForm()" class="text-xs text-zinc-400 hover:text-zinc-600 transition-colors">Change URL</button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1.5">Artist</label>
+                    <input type="text" id="artistInput" placeholder="Artist Name" 
+                        class="w-full px-4 py-3 bg-white border border-zinc-200 rounded-lg text-sm focus:outline-none focus:border-zinc-400 text-zinc-800">
+                </div>
+
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1.5">File Name</label>
+                    <input type="text" id="filenameInput" placeholder="File Name" 
+                        class="w-full px-4 py-3 bg-white border border-zinc-200 rounded-lg text-sm focus:outline-none focus:border-zinc-400 text-zinc-800">
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <button onclick="downloadFile()" 
+                    class="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-sm font-medium transition-colors border border-zinc-900 flex items-center justify-center space-x-2">
+                    <span>Download</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="py-4 text-center text-xs text-zinc-400 border-t border-zinc-100">
+    Minimalist Audio Processing
+</footer>
+
+<script>
+    let currentVideoId = '';
+
+    function extractVideoID(url) {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    function validateUrl() {
+        const url = document.getElementById('urlInput').value.trim();
+        const videoId = extractVideoID(url);
+
+        if (!videoId) {
+            alert('Please enter a valid YouTube URL.');
+            return;
+        }
+
+        currentVideoId = videoId;
+        
+        // Set default fields
+        document.getElementById('artistInput').value = 'Unknown Artist';
+        document.getElementById('filenameInput').value = 'Audio Track';
+
+        // Transition views
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.remove('hidden');
+    }
+
+    function resetForm() {
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step1').classList.remove('hidden');
+        document.getElementById('urlInput').value = '';
+    }
+
+    function downloadFile() {
+        const artist = document.getElementById('artistInput').value || 'Artist';
+        const filename = document.getElementById('filenameInput').value || 'Track';
+        
+        // Link redirection for conversion trigger
+        const downloadUrl = `https://loader.to/api/button/?url=https://www.youtube.com/watch?v=${currentVideoId}&f=mp3`;
+        window.open(downloadUrl, '_blank');
+    }
+
+    // Support pressing Enter on the input field
+    document.getElementById('urlInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            validateUrl();
+        }
+    });
+</script>
